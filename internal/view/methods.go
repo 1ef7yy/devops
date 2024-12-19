@@ -13,7 +13,13 @@ func (v *view) GetUserByName(w http.ResponseWriter, r *http.Request) {
 	if name == "" {
 		v.Logger.Info("Name is empty")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Bad request: Name is empty"))
+		_, err := w.Write([]byte("Bad request: Name is empty"))
+		if err != nil {
+			v.Logger.Error("Error writing response: " + err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Internal server error: %s", err.Error())
+			return
+		}
 		return
 	}
 
@@ -34,7 +40,13 @@ func (v *view) GetUserByName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, err = w.Write(resp)
+	if err != nil {
+		v.Logger.Error("Error writing response: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Internal server error: %s", err.Error())
+		return
+	}
 }
 
 func (v *view) InsertUser(w http.ResponseWriter, r *http.Request) {
