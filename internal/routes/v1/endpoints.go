@@ -11,5 +11,13 @@ func (v *Router) Endpoints() http.Handler {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 
+	mux.Handle("GET /users", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		v.View.GetUserByName(w, r)
+	}))
+
+	mux.Handle("POST /users", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		v.View.InsertUser(w, r)
+	}))
+
 	return http.StripPrefix("/api", mux)
 }

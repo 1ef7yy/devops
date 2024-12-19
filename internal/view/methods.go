@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/1ef7yy/devops-course/internal/models"
 )
 
 func (v *view) GetUserByName(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +21,7 @@ func (v *view) GetUserByName(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		v.Logger.Error("Error getting user: " + err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Internal server error: "+err.Error())
+		fmt.Fprintf(w, "Internal server error: %s", err.Error())
 		return
 	}
 
@@ -28,7 +30,7 @@ func (v *view) GetUserByName(w http.ResponseWriter, r *http.Request) {
 		v.Logger.Error("Error marshaling data: " + err.Error())
 		v.Logger.Debug(fmt.Sprintf("Data: %v", data))
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Internal server error: "+err.Error())
+		fmt.Fprintf(w, "Internal server error: %s", err.Error())
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -36,4 +38,22 @@ func (v *view) GetUserByName(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v *view) InsertUser(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		v.Logger.Error("Error decoding user: " + err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Bad request: %s", err.Error())
+		return
+	}
+
+	err = v.domain.InsertUser(user)
+	if err != nil {
+		v.Logger.Error("Error inserting user: " + err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Internal server error: %s", err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
